@@ -1,37 +1,25 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Play, Square, Settings2 } from 'lucide-react';
 
-export const VolumeManager = ({ currentTokenAddress }: { currentTokenAddress: string }) => {
+export const VolumeManager = ({ currentTokenAddress, onStart }: any) => {
     const [settings, setSettings] = useState({
-        buyAmount: 0.01,
-        minBuys: 2, 
+        minAmount: 0.01,
+        maxAmount: 0.05,
+        dryRun: true,
+        minBuys: 2,
         maxBuys: 5,
         minDelay: 10,
-        maxDelay: 30,
+        maxDelay: 30
     });
 
     const [isRunning, setIsRunning] = useState(false);
 
     const handleToggle = async () => {
-        const endpoint = isRunning ? '/api/stop-bot' : '/api/start-bot';
-        const payload = isRunning 
-            ? { tokenAddress: currentTokenAddress } 
-            : { tokenAddress: currentTokenAddress, settings };
-
-        try {
-            const response = await fetch(`http://localhost:4000${endpoint}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-
-            if (response.ok) {
-                setIsRunning(!isRunning);
-            } else {
-                alert("Failed to update bot status");
-            }
-        } catch (error) {
-            console.error("Connection error:", error);
+        if (!isRunning) {
+            await onStart(settings);
+            setIsRunning(true);
+        } else {
+            setIsRunning(false);
         }
     };
 
@@ -41,14 +29,22 @@ export const VolumeManager = ({ currentTokenAddress }: { currentTokenAddress: st
                 <Settings2 size={20} /> VOLUME STRATEGY
             </h2>
 
-            {/* Input fields for settings */}
             <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1">
-                    <label className="text-[10px] text-slate-500 font-bold">BUY AMOUNT (SOL)</label>
+                    <label className="text-[10px] text-slate-500 font-bold">MIN AMOUNT (SOL)</label>
                     <input 
                         type="number" 
-                        value={settings.buyAmount}
-                        onChange={(e) => setSettings({...settings, buyAmount: Number(e.target.value)})}
+                        value={settings.minAmount}
+                        onChange={(e) => setSettings({...settings, minAmount: Number(e.target.value)})}
+                        className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
+                    />
+                </div>
+                <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-slate-500 font-bold">MAX AMOUNT (SOL)</label>
+                    <input 
+                        type="number" 
+                        value={settings.maxAmount}
+                        onChange={(e) => setSettings({...settings, maxAmount: Number(e.target.value)})}
                         className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
                     />
                 </div>
@@ -75,7 +71,7 @@ export const VolumeManager = ({ currentTokenAddress }: { currentTokenAddress: st
                     <input 
                         type="number" 
                         value={settings.minDelay}
-                        onChange={(e) => setSettings({...settings, maxBuys: Number(e.target.value)})}
+                        onChange={(e) => setSettings({...settings, minDelay: Number(e.target.value)})}
                         className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
                     />
                 </div>
@@ -84,10 +80,22 @@ export const VolumeManager = ({ currentTokenAddress }: { currentTokenAddress: st
                     <input 
                         type="number" 
                         value={settings.maxDelay}
-                        onChange={(e) => setSettings({...settings, maxBuys: Number(e.target.value)})}
+                        onChange={(e) => setSettings({...settings, maxDelay: Number(e.target.value)})}
                         className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
                     />
                 </div>
+            </div>
+
+            <div className="flex items-center gap-2 p-2 bg-yellow-900/20 border border-yellow-700/50 rounded">
+                <input 
+                    type="checkbox" 
+                    checked={settings.dryRun} 
+                    onChange={(e) => setSettings({...settings, dryRun: e.target.checked})}
+                    id="dryRunToggle"
+                />
+                <label htmlFor="dryRunToggle" className="text-yellow-500 text-sm font-bold">
+                    Enable Dry Run (Simulated Trading)
+                </label>
             </div>
 
             <button 
