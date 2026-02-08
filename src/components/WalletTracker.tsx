@@ -27,7 +27,7 @@ export function WalletTracker() {
         };
 
         fetchBalances();
-        const interval = setInterval(fetchBalances, 10000);
+        const interval = setInterval(fetchBalances, 10 * 1000);
         return () => clearInterval(interval);
     }, []);
 
