@@ -16,5 +16,16 @@ export const startBotAction = async (tokenAddress: string, settings: any) => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ tokenAddress, settings }),
     });
+    console.log("Bot start command sent successfully");
     return response;
+};
+
+export const stopBotAction = async (tokenAddress: string) => {
+    const response = await fetch('http://localhost:4000/api/volume/stop-bot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenAddress })
+    });
+    console.log("Bot stop command sent successfully");
+    return response; 
 };

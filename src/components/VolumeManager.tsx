@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { Play, Square, Settings2 } from 'lucide-react';
 
-export const VolumeManager = ({ currentTokenAddress, onStart }: any) => {
+export const VolumeManager = ({ 
+    currentTokenAddress, 
+    onStart, 
+    onStop}: any) => {
     const [settings, setSettings] = useState({
         minAmount: 0.01,
         maxAmount: 0.05,
@@ -19,6 +22,7 @@ export const VolumeManager = ({ currentTokenAddress, onStart }: any) => {
             await onStart(settings);
             setIsRunning(true);
         } else {
+            await onStop();
             setIsRunning(false);
         }
     };
