@@ -7,12 +7,14 @@ export const VolumeManager = ({
     onStop}: any) => {
     const [settings, setSettings] = useState({
         minAmount: 0.01,
-        maxAmount: 0.05,
+        maxAmount: 0.02,
+        targetMakers: 10,
+        batchSize: 10,
         dryRun: true,
-        minBuys: 2,
-        maxBuys: 5,
+        minBuys: 1,
+        maxBuys: 2,
         minDelay: 10,
-        maxDelay: 30
+        maxDelay: 20
     });
 
     const [isRunning, setIsRunning] = useState(false);
@@ -29,8 +31,8 @@ export const VolumeManager = ({
 
     return (
         <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 space-y-6 shadow-xl">
-            <h2 className="text-cyan-400 font-bold flex items-center gap-2">
-                <Settings2 size={20} /> VOLUME STRATEGY
+            <h2 className="text-cyan-400 font-bold flex items-center gap-2 text-sm uppercase tracking-wider">
+                <Settings2 size={18} /> Volume & Maker Strategy
             </h2>
 
             <div className="grid grid-cols-2 gap-4">
@@ -49,6 +51,15 @@ export const VolumeManager = ({
                         type="number" 
                         value={settings.maxAmount}
                         onChange={(e) => setSettings({...settings, maxAmount: Number(e.target.value)})}
+                        className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
+                    />
+                </div>
+                <div className="flex flex-col gap-1">
+                    <label className="text-[10px] text-slate-500 font-bold uppercase">Target Total Makers</label>
+                    <input 
+                        type="number" 
+                        value={settings.targetMakers}
+                        onChange={(e) => setSettings({...settings, targetMakers: Number(e.target.value)})}
                         className="bg-black border border-slate-700 rounded p-2 text-white outline-none focus:border-cyan-500"
                     />
                 </div>
@@ -104,17 +115,11 @@ export const VolumeManager = ({
 
             <button 
                 onClick={handleToggle}
-                className={`w-full py-4 rounded-xl font-black text-lg flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-lg ${
-                    isRunning 
-                        ? 'bg-red-500 hover:bg-red-600 shadow-red-900/20' 
-                        : 'bg-green-600 hover:bg-green-500 shadow-green-900/20'
+                className={`w-full py-4 rounded-xl font-black text-lg flex items-center justify-center gap-2 transition-all ${
+                    isRunning ? 'bg-red-500' : 'bg-cyan-600 hover:bg-cyan-500 shadow-cyan-900/20'
                 }`}
             >
-                {isRunning ? (
-                    <><Square size={20} fill="white" /> STOP BOT</>
-                ) : (
-                    <><Play size={20} fill="white" /> START VOLUME BOT</>
-                )}
+                {isRunning ? <><Square size={20} fill="white" /> STOP CAMPAIGN</> : <><Play size={20} fill="white" /> START CAMPAIGN</>}
             </button>
             
             {isRunning && (
@@ -122,6 +127,16 @@ export const VolumeManager = ({
                     ● BOT ACTIVE: Randomizing {settings.minBuys}-{settings.maxBuys} buys...
                 </div>
             )}
+
+            {/* {isRunning && (
+                <div className="flex items-center justify-center gap-2 text-xs text-cyan-400 font-mono italic">
+                    <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+                    </span>
+                    Rotating batches of {settings.batchSize} wallets...
+                </div>
+            )} */}
         </div>
     );
 };

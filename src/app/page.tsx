@@ -102,15 +102,7 @@ const ActivityLog = ({ logs }: { logs: string[] }) => (
   <section className="bg-slate-900 p-6 rounded-xl border border-slate-800 h-64 overflow-y-auto">
     <h2 className="text-sm uppercase text-slate-400 mb-4 flex gap-2"><Database size={16}/> Live Activity</h2>
     <div className="font-mono text-[10px] space-y-1">
-      {logs.map((log, i) => (
-        <p key={i} className={`pl-2 border-l border-slate-700 ${
-            log.includes('❌') ? 'text-red-400' : 
-            log.includes('🚀') ? 'text-green-400' : 
-            'text-slate-300'
-        }`}>
-          {log}
-        </p>
-      ))}
+      {logs.map((log, i) => <p key={i} className="text-slate-300 border-l border-slate-700 pl-2">{log}</p>)}
     </div>
   </section>
 );
