@@ -9,6 +9,7 @@ import { WalletTracker } from '../components/WalletTracker';
 import { ProfitTracker } from '../components/ProfitTracker';
 import { Stats } from '@/components/Stats';
 import { startBotAction, stopBotAction } from '@/lib/bot-api';
+import { HoldersManager } from '@/components/HoldersManager';
 
 const WalletMultiButtonDynamic = dynamic(
     async () => (await import('@solana/wallet-adapter-react-ui')).WalletMultiButton,
@@ -70,6 +71,7 @@ export default function Home() {
           {/* Left Column (4/12) */}
           <div className="md:col-span-4 space-y-6">
             <CampaignConfig tokenAddress={tokenAddress} setTokenAddress={setTokenAddress} />
+            <HoldersManager tokenAddress={tokenAddress} />
             <VolumeManager currentTokenAddress={tokenAddress} onStart={handleStart} onStop={handleStop} />
           </div>
 

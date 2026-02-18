@@ -29,3 +29,13 @@ export const stopBotAction = async (tokenAddress: string) => {
     console.log("Bot stop command sent successfully");
     return response; 
 };
+
+export const buyHolders = async (tokenAddress: string) => {
+    if (!confirm("Buy holders?")) return;
+    const res = await fetch('http://localhost:4000/api/holders', { 
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ tokenAddress, amount: 5 }),
+    });
+    return res.ok;
+};
