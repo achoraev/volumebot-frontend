@@ -6,9 +6,9 @@ export const VolumeManager = ({
     onStart, 
     onStop}: any) => {
     const [settings, setSettings] = useState({
-        minAmount: 0.01,
-        maxAmount: 0.02,
-        targetMakers: 10,
+        minAmount: 0.001,
+        maxAmount: 0.002,
+        targetMakers: 3,
         batchSize: 10,
         dryRun: true,
         minBuys: 1,
