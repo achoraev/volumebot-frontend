@@ -1,20 +1,43 @@
 import { useState, useEffect } from 'react';
-import { Users, Send, Loader2, ExternalLink, RefreshCw, Wallet } from 'lucide-react';
+import { Users, Send, Loader2, ExternalLink, RefreshCw, Wallet, ArrowDownToLine } from 'lucide-react';
 import { buyHolders } from '@/lib/bot-api';
 
-export const HolderManager = ({ tokenAddress }: any) => {
+export const HolderManager = ({ tokenAddress, userWallet }: { tokenAddress: string, userWallet: any }) => {
     const [holderCount, setHolderCount] = useState(30);
     const [buyAmount, setBuyAmount] = useState(0.001);
     const [isProcessing, setIsProcessing] = useState(false);
     const [holderWallets, setHolderWallets] = useState<any[]>([]);
     const [loadingWallets, setLoadingWallets] = useState(false);
 
+    const handleFullReclaim = async () => {
+        if (!userWallet || !tokenAddress) return alert("Connect wallet and set Token Address!");
+        if (!confirm("This will reclaim ALL Tokens and SOL from all holder wallets. Continue?")) return;
+    
+        setIsProcessing(true);
+        try {
+            await fetch('http://localhost:4000/api/reclaim-all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    destination: userWallet, 
+                    type: 'holders',
+                    tokenMint: tokenAddress // Pass this to reclaim tokens too
+                })
+            });
+            fetchHolderWallets();
+        } finally {
+            setIsProcessing(false);
+        }
+    };
+
     const fetchHolderWallets = async () => {
+        if (!tokenAddress) return;
         setLoadingWallets(true);
         try {
-            // New endpoint to get wallets specifically marked as "holders"
-            const res = await fetch('http://localhost:4000/api/holder-balances');
+            const res = await fetch(`http://localhost:4000/api/holder-balances?tokenAddress=${tokenAddress}`);
             const data = await res.json();
+            console.log("Fetched Holder Wallets:", data.wallets || data);
+
             setHolderWallets(Array.isArray(data) ? data : data.wallets || []);
         } catch (err) {
             console.error("❌ Failed to fetch holder wallets:", err);
@@ -25,7 +48,7 @@ export const HolderManager = ({ tokenAddress }: any) => {
 
     useEffect(() => {
         fetchHolderWallets();
-        const interval = setInterval(fetchHolderWallets, 15000);
+        const interval = setInterval(fetchHolderWallets, 10000);
         return () => clearInterval(interval);
     }, []);
 
@@ -55,8 +78,8 @@ export const HolderManager = ({ tokenAddress }: any) => {
                 <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-500 uppercase px-1">New Holders</label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             value={holderCount}
                             onChange={(e) => setHolderCount(Number(e.target.value))}
                             className="w-full bg-black border border-slate-800 rounded p-2 text-sm text-white outline-none focus:border-indigo-500"
@@ -64,8 +87,8 @@ export const HolderManager = ({ tokenAddress }: any) => {
                     </div>
                     <div className="space-y-1.5">
                         <label className="text-[10px] font-bold text-slate-500 uppercase px-1">Amount (SOL)</label>
-                        <input 
-                            type="number" 
+                        <input
+                            type="number"
                             step="0.001"
                             value={buyAmount}
                             onChange={(e) => setBuyAmount(Number(e.target.value))}
@@ -74,7 +97,7 @@ export const HolderManager = ({ tokenAddress }: any) => {
                     </div>
                 </div>
 
-                <button 
+                <button
                     onClick={handleBuyHolders}
                     disabled={isProcessing || !tokenAddress}
                     className="w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all"
@@ -90,33 +113,50 @@ export const HolderManager = ({ tokenAddress }: any) => {
                     <h3 className="text-white font-bold text-[10px] uppercase tracking-widest flex items-center gap-2">
                         <Wallet size={14} className="text-indigo-400" /> Active Holder Wallets
                     </h3>
-                    <button onClick={fetchHolderWallets} className="text-slate-500 hover:text-white">
-                        <RefreshCw size={12} className={loadingWallets ? "animate-spin" : ""} />
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={handleFullReclaim}
+                            className="text-[10px] text-orange-400 hover:text-orange-300 font-black uppercase flex items-center gap-1"
+                        >
+                            <ArrowDownToLine size={12} /> Sweep All to Main
+                        </button>
+                        <button onClick={fetchHolderWallets} className="text-slate-500 hover:text-white">
+                            <RefreshCw size={12} className={loadingWallets ? "animate-spin" : ""} />
+                        </button>
+                    </div>
                 </div>
-                
+
                 <div className="max-h-[300px] overflow-y-auto">
                     <table className="w-full text-left text-[11px]">
                         <thead className="text-slate-500 bg-black/40 uppercase sticky top-0">
                             <tr>
                                 <th className="p-3">Wallet</th>
+                                <th className="p-3">SOL</th>
                                 <th className="p-3">Tokens</th>
-                                <th className="p-3 text-right">Link</th>
+                                <th className="p-3 text-right">Status</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-800/50 font-mono">
                             {holderWallets.map((w, i) => (
-                                <tr key={i} className="hover:bg-indigo-500/5 transition-colors">
-                                    <td className="p-3 text-slate-400">
+                                <tr key={i} className="hover:bg-indigo-500/5 transition-colors group">
+                                    <td className="p-3 font-mono text-slate-400 flex items-center gap-2">
                                         {w.address.slice(0, 4)}...{w.address.slice(-4)}
+                                        <a href={`https://solscan.io/account/${w.address}`} target="_blank" className="opacity-0 group-hover:opacity-100 text-indigo-400 transition-opacity">
+                                            <ExternalLink size={10} />
+                                        </a>
                                     </td>
+                                    {/* Added SOL Column */}
+                                    <td className="p-3 text-slate-300 font-medium">
+                                        {Number(w.balance || 0).toFixed(4)} <span className="text-[9px] text-slate-500">SOL</span>
+                                    </td>
+                                    {/* Token Balance Column */}
                                     <td className="p-3 text-indigo-400 font-bold">
-                                        {parseFloat(w.tokenBalance || 0).toLocaleString()}
+                                        {w.tokenBalance > 0 ? Number(w.tokenBalance).toLocaleString() : '0'}
                                     </td>
                                     <td className="p-3 text-right">
-                                        <a href={`https://solscan.io/account/${w.address}`} target="_blank" className="text-slate-600 hover:text-cyan-400 inline-block">
-                                            <ExternalLink size={12} />
-                                        </a>
+                                        <div className="flex justify-end gap-2">
+                                            <span className={`w-1.5 h-1.5 rounded-full mt-1.5 ${w.tokenBalance > 0 ? 'bg-green-500' : 'bg-slate-700'}`} />
+                                        </div>
                                     </td>
                                 </tr>
                             ))}

@@ -77,7 +77,7 @@ export default function Home() {
 
   const ActivityLog = ({ logs }: { logs: string[] }) => (
     <section className="bg-slate-900 p-6 rounded-xl border border-slate-800 h-64 overflow-y-auto">
-      <h2 className="text-sm uppercase text-slate-400 mb-4 flex gap-2"><Database size={16}/> Live Activity</h2>
+      <h2 className="text-sm uppercase text-slate-400 mb-4 flex gap-2"><Database size={16} /> Live Activity</h2>
       <div className="font-mono text-[10px] space-y-1">
         {logs.map((log, i) => <p key={i} className="text-slate-300 border-l border-slate-700 pl-2">{log}</p>)}
       </div>
@@ -86,10 +86,25 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 p-4 md:p-8">
-      <header className="flex justify-between items-center mb-12 border-b border-slate-800 pb-6">
-        <h1 className="text-2xl font-bold text-cyan-400 flex gap-2"><Activity />SolanaVolumeBot</h1>
+
+      <header className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-slate-800 pb-6">
+        <div className="flex items-center gap-3">
+          <div className="bg-cyan-500/10 p-2 rounded-lg">
+            <Activity className="text-cyan-400" size={32} />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-white">SolanaVolumeBot <span className="text-cyan-500 text-xs ml-2">v3.0</span></h1>
+            <p className="text-slate-500 text-xs">High-Frequency Market Making & Holder Growth</p>
+          </div>
+        </div>
         <WalletMultiButtonDynamic />
       </header>
+
+      {!connected && (
+        <div className="bg-amber-500/10 border border-amber-500/20 p-2 text-center text-xs text-amber-500 mb-4 rounded">
+          ⚠️ Wallet not connected. Some management features may be disabled.
+        </div>
+      )}
 
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -130,7 +145,7 @@ export default function Home() {
                   onStop={handleStop}
                 />
               ) : (
-                <HolderManager tokenAddress={tokenAddress} />
+                <HolderManager tokenAddress={tokenAddress} userWallet={publicKey?.toBase58()} />
               )}
             </div>
           </div>

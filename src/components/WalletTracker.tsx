@@ -9,7 +9,9 @@ export const WalletTracker = ({ tokenAddress, userWallet }: { tokenAddress: stri
     const fetchBalances = async () => {
         try {
             const res = await fetch('http://localhost:4000/api/balances');
+            console.log('Front ' + res.status, res.statusText);
             const data = await res.json();
+            console.log("Fetched Wallet Balances:", data);
             setWallets(Array.isArray(data) ? data : data.wallets || []);
         } catch (err) {
             console.error("❌ Wallet fetch error:", err);
@@ -49,12 +51,37 @@ export const WalletTracker = ({ tokenAddress, userWallet }: { tokenAddress: stri
         }
     };
 
+    const handleMassReclaim = async () => {
+        if (!userWallet || !tokenAddress) return alert("Missing requirements!");
+        setLoading(true);
+        try {
+            await fetch('http://localhost:4000/api/reclaim-all', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    destination: userWallet, 
+                    type: 'makers',
+                    tokenMint: tokenAddress 
+                })
+            });
+            fetchBalances();
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden shadow-2xl">
             <div className="p-4 bg-slate-800/50 border-b border-slate-800 flex justify-between items-center">
                 <h3 className="text-white font-bold text-sm flex items-center gap-2">
                     <Wallet size={16} className="text-cyan-400" /> BATCH MAKERS
                 </h3>
+                <button
+                    onClick={handleMassReclaim}
+                    className="ml-auto mr-4 text-[10px] bg-orange-500/10 text-orange-500 border border-orange-500/20 px-2 py-1 rounded hover:bg-orange-500 hover:text-white transition-all"
+                >
+                    RECLAIM ALL TOKENS AND SOL
+                </button> 
                 <button onClick={fetchBalances} className="text-slate-500 hover:text-white transition-colors">
                     <Loader2 size={14} className={loading ? "animate-spin" : ""} />
                 </button>
@@ -80,7 +107,7 @@ export const WalletTracker = ({ tokenAddress, userWallet }: { tokenAddress: stri
                                     </a>
                                 </td>
                                 <td className="p-3 text-white font-medium">
-                                    {parseFloat(w.balance).toFixed(3)}
+                                    {Number(w.balance || 0).toFixed(3)} SOL
                                 </td>
                                 <td className="p-3 text-cyan-400 font-bold">
                                     {w.tokenBalance > 0 ? parseFloat(w.tokenBalance).toLocaleString() : '0'}
