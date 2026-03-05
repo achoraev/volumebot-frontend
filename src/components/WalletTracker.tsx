@@ -9,12 +9,10 @@ export const WalletTracker = ({ tokenAddress, userWallet }: { tokenAddress: stri
     const fetchBalances = async () => {
         try {
             const res = await fetch('http://localhost:4000/api/balances');
-            console.log('Front ' + res.status, res.statusText);
             const data = await res.json();
-            console.log("Fetched Wallet Balances:", data);
             setWallets(Array.isArray(data) ? data : data.wallets || []);
         } catch (err) {
-            console.error("❌ Wallet fetch error:", err);
+            console.log("❌ Wallet fetch error:", err);
         } finally {
             setLoading(false);
         }

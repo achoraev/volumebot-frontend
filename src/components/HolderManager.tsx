@@ -40,7 +40,7 @@ export const HolderManager = ({ tokenAddress, userWallet }: { tokenAddress: stri
 
             setHolderWallets(Array.isArray(data) ? data : data.wallets || []);
         } catch (err) {
-            console.error("❌ Failed to fetch holder wallets:", err);
+            console.log("❌ Failed to fetch holder wallets:", err);
         } finally {
             setLoadingWallets(false);
         }

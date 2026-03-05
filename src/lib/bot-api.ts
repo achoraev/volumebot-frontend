@@ -1,8 +1,8 @@
-export const distributeFunds = async () => {
-    if (!confirm("Send 0.02 SOL to ALL child wallets?")) return;
-    const res = await fetch('http://localhost:4000/api/distribute', { method: 'POST' });
-    return res.json();
-};
+// export const distributeFunds = async () => {
+//     if (!confirm("Send 0.02 SOL to ALL child wallets?")) return;
+//     const res = await fetch('http://localhost:4000/api/distribute', { method: 'POST' });
+//     return res.json();
+// };
 
 export const withdrawFunds = async (tokenAddress: string, userWallet: string) => {
     if (!confirm("Pull all SOL back to Main Wallet?")) return;
